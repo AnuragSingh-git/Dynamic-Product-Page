@@ -1,5 +1,8 @@
 import moongoose from "mongoose";
 
+
+dotenv.config();
+
 const connectDB = async () => {
     try {
         const conn = await moongoose.connect(process.env.MONGO_URI);
