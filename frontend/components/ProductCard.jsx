@@ -11,7 +11,7 @@ export default function ProductCard({ product }) {
     >
       <div className="aspect-square bg-gray-50 relative">
         <Image
-          src={variant.image}
+          src={variant.images[0]}
           alt={product.name}
           fill
           className="object-cover"

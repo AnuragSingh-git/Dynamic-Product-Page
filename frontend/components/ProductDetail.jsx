@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { getEmiPlansForPrincipal } from "@/lib/emi";
 
 export default function ProductDetail({ product }) {
   const colors = useMemo(
@@ -17,6 +18,7 @@ export default function ProductDetail({ product }) {
   const [selectedStorage, setSelectedStorage] = useState(storages[0]);
   const [selectedTenure, setSelectedTenure] = useState(product.emiPlans[0].tenureMonths);
   const [confirmedPlan, setConfirmedPlan] = useState(null);
+  const [activeImage, setActiveImage] = useState(0);
 
   // Fall back to the first variant that matches color if the exact
   // color+storage combination doesn't exist for this product.
@@ -25,7 +27,21 @@ export default function ProductDetail({ product }) {
       (v) => v.color === selectedColor && v.storage === selectedStorage
     ) || product.variants.find((v) => v.color === selectedColor) || product.variants[0];
 
-  const selectedPlan = product.emiPlans.find((p) => p.tenureMonths === selectedTenure);
+  // Reset the gallery back to the first photo whenever the selected
+  // variant changes, so we never show an out-of-range thumbnail.
+  useEffect(() => {
+    setActiveImage(0);
+  }, [variant.color, variant.storage]);
+
+  // EMI plans are stored as templates (tenure/interest/cashback) — the
+  // actual monthly amount is derived here from the *selected variant's*
+  // price, so it updates immediately when the user picks a different
+  // color/storage/model.
+  const emiPlans = useMemo(
+    () => getEmiPlansForPrincipal(product.emiPlans, variant.price),
+    [product.emiPlans, variant.price]
+  );
+  const selectedPlan = emiPlans.find((p) => p.tenureMonths === selectedTenure) || emiPlans[0];
 
   const handleProceed = () => {
     setConfirmedPlan(selectedPlan);
@@ -33,9 +49,34 @@ export default function ProductDetail({ product }) {
 
   return (
     <div className="grid md:grid-cols-2 gap-10">
-      {/* Image */}
-      <div className="aspect-square bg-gray-50 rounded-xl relative overflow-hidden">
-        <Image src={variant.image} alt={product.name} fill className="object-cover" />
+      {/* Image gallery */}
+      <div>
+        <div className="aspect-square bg-gray-50 rounded-xl relative overflow-hidden">
+          <Image
+            src={variant.images[activeImage]}
+            alt={`${product.name} - ${variant.color} - photo ${activeImage + 1}`}
+            fill
+            className="object-cover"
+            priority
+          />
+        </div>
+
+        {variant.images.length > 1 && (
+          <div className="flex gap-2 mt-3">
+            {variant.images.map((img, index) => (
+              <button
+                key={img}
+                onClick={() => setActiveImage(index)}
+                aria-label={`Show photo ${index + 1}`}
+                className={`relative w-16 h-16 rounded-lg overflow-hidden border-2 shrink-0 ${
+                  activeImage === index ? "border-brand-orange" : "border-transparent"
+                }`}
+              >
+                <Image src={img} alt="" fill className="object-cover" />
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Details */}
@@ -102,7 +143,7 @@ export default function ProductDetail({ product }) {
         {/* EMI plans */}
         <h2 className="font-semibold text-gray-900 mb-2">EMI plans backed by mutual funds</h2>
         <div className="space-y-2 mb-6">
-          {product.emiPlans.map((plan) => (
+          {emiPlans.map((plan) => (
             <label
               key={plan.tenureMonths}
               className={`flex items-center justify-between border rounded-lg p-3 cursor-pointer ${
