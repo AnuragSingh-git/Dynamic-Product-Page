@@ -4,7 +4,6 @@ A full-stack web app that displays products (smartphones, headphones, watches, e
 multiple variants and dynamic EMI plans, similar to Snapmint. All product, variant, and EMI
 data is stored in MongoDB and served through a REST API — nothing is hardcoded on the frontend.
 
-Built for the 1Fi SDE1 assignment.
 
 ---
 
