@@ -12,7 +12,6 @@ app.get("/", (req, res) => {
 
 app.use("/api/products", productRoutes);
 
-// 404 handler
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
 });

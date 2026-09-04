@@ -2,12 +2,9 @@ import mongoose from "mongoose";
 
 const emiPlanSchema = new mongoose.Schema(
   {
-    tenureMonths: { type: Number, required: true }, // e.g. 3, 6, 12, 24, 36
-    interestRate: { type: Number, required: true, default: 0 }, // e.g. 0 or 10.5 (annual %)
-    cashback: { type: Number, default: 0 }, // e.g. 7500
-    // NOTE: monthlyAmount is intentionally NOT stored. It depends on the
-    // selected variant's price, so it's calculated on the fly (see
-    // frontend/lib/emi.js) instead of being hardcoded per product.
+    tenureMonths: { type: Number, required: true },
+    interestRate: { type: Number, required: true, default: 0 },
+    cashback: { type: Number, default: 0 },
   },
   { _id: false }
 );
@@ -15,9 +12,9 @@ const emiPlanSchema = new mongoose.Schema(
 const variantSchema = new mongoose.Schema(
   {
     color: { type: String, required: true },
-    storage: { type: String, required: true }, // e.g. "256GB"
-    price: { type: Number, required: true }, // discounted / selling price
-    mrp: { type: Number, required: true }, // strikethrough price
+    storage: { type: String, required: true },
+    price: { type: Number, required: true },
+    mrp: { type: Number, required: true },
     images: {
       type: [String],
       required: true,
