@@ -20,23 +20,15 @@ export default function ProductDetail({ product }) {
   const [confirmedPlan, setConfirmedPlan] = useState(null);
   const [activeImage, setActiveImage] = useState(0);
 
-  // Fall back to the first variant that matches color if the exact
-  // color+storage combination doesn't exist for this product.
   const variant =
     product.variants.find(
       (v) => v.color === selectedColor && v.storage === selectedStorage
     ) || product.variants.find((v) => v.color === selectedColor) || product.variants[0];
 
-  // Reset the gallery back to the first photo whenever the selected
-  // variant changes, so we never show an out-of-range thumbnail.
   useEffect(() => {
     setActiveImage(0);
   }, [variant.color, variant.storage]);
 
-  // EMI plans are stored as templates (tenure/interest/cashback) — the
-  // actual monthly amount is derived here from the *selected variant's*
-  // price, so it updates immediately when the user picks a different
-  // color/storage/model.
   const emiPlans = useMemo(
     () => getEmiPlansForPrincipal(product.emiPlans, variant.price),
     [product.emiPlans, variant.price]
@@ -49,7 +41,6 @@ export default function ProductDetail({ product }) {
 
   return (
     <div className="grid md:grid-cols-2 gap-10">
-      {/* Image gallery */}
       <div>
         <div className="aspect-square bg-gray-50 rounded-xl relative overflow-hidden">
           <Image
